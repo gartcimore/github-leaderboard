@@ -50,20 +50,24 @@ func main() {
 		}
 
 		for i, repository := range repositories {
-			fmt.Printf("%v. %v\n", i+1, repository.GetFullName())
+			fmt.Printf("%v. %v \n", i+1, repository.GetFullName())
+			if repository.GetHasIssues() {
+				fmt.Printf("Listing issues for repository %v \n", repository.GetFullName())
+				issuesOptions := github.IssueListByRepoOptions{State: "all", Assignee: "*"}
+				issues, _, err := client.Issues.ListByRepo(ctx, user, repository.GetName(), &issuesOptions)
+				if err != nil {
+					fmt.Println("Error while reading issues")
+				}
+
+				for i, issue := range issues {
+					fmt.Printf("%v. %q\n", i+1, issue.GetTitle())
+				}
+			}
+
 		}
 
 		fmt.Printf("user %v has %v repos\n", user, len(repositories))
 
-		//issuesOptions := github.IssueListOptions{Filter: user}
-		issues, _, err := client.Issues.List(ctx, true, nil)
-		if err != nil {
-			fmt.Println("Error while reading issues")
-		}
-
-		for i, issue := range issues {
-			fmt.Printf("%v. %v\n", i+1, issue.Title)
-		}
 	}
 
 }
