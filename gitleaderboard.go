@@ -8,6 +8,11 @@ import (
 	"golang.org/x/oauth2"
 	"log"
 	"os"
+	"time"
+)
+
+const (
+	ISOLayout = "2006-01-02"
 )
 
 func readParticipants() []string {
@@ -40,6 +45,18 @@ func main() {
 
 	client := github.NewClient(tc)
 
+	// List all issues and PR since october for connected user
+	october, _ := time.Parse(ISOLayout, "2019-10-01")
+	issuesOptions := github.IssueListOptions{State: "all", Filter: "created", Since: october}
+	issues, _, err := client.Issues.List(ctx, true, &issuesOptions)
+	if err != nil {
+		fmt.Println("Error while reading issues")
+	}
+
+	for i, issue := range issues {
+		fmt.Printf("%v. %q %q \n", i+1, issue.GetTitle(), issue.GetState())
+	}
+
 	// list all repositories for each user
 
 	for i, user := range participants {
@@ -63,7 +80,6 @@ func main() {
 					fmt.Printf("%v. %q\n", i+1, issue.GetTitle())
 				}
 			}
-
 		}
 
 		fmt.Printf("user %v has %v repos\n", user, len(repositories))
