@@ -17,10 +17,9 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
-  
 - task: Go@0
-    inputs:
-      command: 'build'
+  inputs:
+    command: 'build'
 - task: Go@0
   inputs:
     command: 'test'
