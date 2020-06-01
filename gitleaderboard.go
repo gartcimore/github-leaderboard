@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/google/go-github/v28/github"
+	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
 	"log"
 	"os"
@@ -16,7 +16,7 @@ const (
 )
 
 func readParticipants() []string {
-	file, err := os.Open("members")
+	file, err := os.Open("participants")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,11 +33,24 @@ func readParticipants() []string {
 	}
 	return participants
 }
+
+func getEnv(key, fallback string) string {
+    if value, ok := os.LookupEnv(key); ok {
+        return value
+    }
+    return fallback
+}
+
 func main() {
 
 	var participants = readParticipants()
 	ctx := context.Background()
-	token := os.Getenv("github_token")
+
+	token, ok := os.LookupEnv("github_token")
+	if !ok {
+			fmt.Println("no value for github_token, can not read info. Set env github_token")
+			os.Exit(2)
+	}
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -59,30 +72,32 @@ func main() {
 
 	// list all repositories for each user
 
-	for i, user := range participants {
-		fmt.Printf("Reading for user %s (%v)\n", user, i)
-		repositories, _, err := client.Repositories.List(ctx, user, nil)
+	for i, participant := range participants {
+		fmt.Printf("Reading for participant %s (%v)\n", participant, i)
+		repositories, _, err := client.Repositories.List(ctx, participant, nil)
 		if err != nil {
 			fmt.Println("Error while reading repositories")
 		}
-
-		for i, repository := range repositories {
-			fmt.Printf("%v. %v \n", i+1, repository.GetFullName())
-			if repository.GetHasIssues() {
-				fmt.Printf("Listing issues for repository %v \n", repository.GetFullName())
-				issuesOptions := github.IssueListByRepoOptions{State: "all", Assignee: "*"}
-				issues, _, err := client.Issues.ListByRepo(ctx, user, repository.GetName(), &issuesOptions)
-				if err != nil {
-					fmt.Println("Error while reading issues")
-				}
-
-				for i, issue := range issues {
-					fmt.Printf("%v. %q\n", i+1, issue.GetTitle())
-				}
-			}
+		user,_, err := client.Users.Get(ctx,participant)
+		if err != nil {
+			fmt.Println("Error while reading user")
 		}
-
-		fmt.Printf("user %v has %v repos\n", user, len(repositories))
+		fmt.Printf("login %s name %s repo %d\n", *user.Login, *user.Name, *user.PublicRepos)
+		// for i, repository := range repositories {
+		// 	fmt.Printf("%v. %v \n", i+1, repository.GetFullName())
+		// 	if repository.GetHasIssues() {
+		// 		fmt.Printf("Listing issues for repository %v \n", repository.GetFullName())
+		// 		issuesOptions := github.IssueListByRepoOptions{State: "all", Assignee: "*"}
+		// 		issues, _, err := client.Issues.ListByRepo(ctx, participant, repository.GetName(), &issuesOptions)
+		// 		if err != nil {
+		// 			fmt.Println("Error while reading issues")
+		// 		}
+		//
+		// 		for i, issue := range issues {
+		// 			fmt.Printf("%v. %q\n", i+1, issue.GetTitle())
+		// 		}
+		// 	}
+		// }
 
 	}
 
