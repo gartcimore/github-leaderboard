@@ -74,15 +74,15 @@ func main() {
 
 	for i, participant := range participants {
 		fmt.Printf("Reading for participant %s (%v)\n", participant, i)
-		repositories, _, err := client.Repositories.List(ctx, participant, nil)
-		if err != nil {
-			fmt.Println("Error while reading repositories")
-		}
+		// repositories, _, err := client.Repositories.List(ctx, participant, nil)
+		// if err != nil {
+		// 	fmt.Println("Error while reading repositories")
+		// }
 		user,_, err := client.Users.Get(ctx,participant)
 		if err != nil {
 			fmt.Println("Error while reading user")
 		}
-		fmt.Printf("login %s name %s repo %d\n", *user.Login, *user.Name, *user.PublicRepos)
+		fmt.Printf("%v login %s name %s repo %d\n", i+1, *user.Login, *user.Name, *user.PublicRepos)
 		// for i, repository := range repositories {
 		// 	fmt.Printf("%v. %v \n", i+1, repository.GetFullName())
 		// 	if repository.GetHasIssues() {
@@ -98,7 +98,29 @@ func main() {
 		// 		}
 		// 	}
 		// }
+		// var allCommits []*github.Commit
+		opt := &github.SearchOptions{
+			ListOptions: github.ListOptions{PerPage: 10},
+		}
+		for {
+			commitResults,response, err := client.Search.Commits(ctx, "#{"+*user.Login+"}",opt)
+			if err != nil {
+				fmt.Println("Error while reading issues")
+				break
+			}
+			if *commitResults.Total > 0 {
+				fmt.Printf("found %d commits \n",commitResults.Total)
+				for commitResult := range commitResults.Commits {
+					fmt.Printf("CommitResult : %v \n",commitResult)
+					// fmt.Printf("CommitResult : %v %v %v \n",*commitResult.Author, *commitResult.Repository, *commitResult.Score)
+					// allCommits = append(allCommits, commitResult.Commit)
+				}
+			}
 
+			if response.NextPage == 0 {
+				break
+			}
+			opt.Page = response.NextPage
+		}
 	}
-
 }
