@@ -41,6 +41,11 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func getFirstDayOfCurrentMonth() time.Time {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+}
+
 func main() {
 
 	var participants = readParticipants()
@@ -102,8 +107,9 @@ func main() {
 		opt := &github.SearchOptions{
 			ListOptions: github.ListOptions{PerPage: 10},
 		}
+		firstDay := getFirstDayOfCurrentMonth()
 		for {
-			commitResults, response, err := client.Search.Commits(ctx, "user:"+*user.Login+" committer-date:>2020-05-01", opt)
+			commitResults, response, err := client.Search.Commits(ctx, "user:"+*user.Login+" committer-date:>"+firstDay.Format("2006-01-02"), opt)
 			if err != nil {
 				fmt.Println("Error while reading commits", err)
 				break
