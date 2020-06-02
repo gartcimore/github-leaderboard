@@ -35,10 +35,10 @@ func readParticipants() []string {
 }
 
 func getEnv(key, fallback string) string {
-    if value, ok := os.LookupEnv(key); ok {
-        return value
-    }
-    return fallback
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
 
 func main() {
@@ -48,8 +48,8 @@ func main() {
 
 	token, ok := os.LookupEnv("github_token")
 	if !ok {
-			fmt.Println("no value for github_token, can not read info. Set env github_token")
-			os.Exit(2)
+		fmt.Println("no value for github_token, can not read info. Set env github_token")
+		os.Exit(2)
 	}
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -78,7 +78,7 @@ func main() {
 		// if err != nil {
 		// 	fmt.Println("Error while reading repositories")
 		// }
-		user,_, err := client.Users.Get(ctx,participant)
+		user, _, err := client.Users.Get(ctx, participant)
 		if err != nil {
 			fmt.Println("Error while reading user")
 		}
@@ -98,22 +98,22 @@ func main() {
 		// 		}
 		// 	}
 		// }
-		// var allCommits []*github.Commit
+		var allCommits []*github.Commit
 		opt := &github.SearchOptions{
 			ListOptions: github.ListOptions{PerPage: 10},
 		}
 		for {
-			commitResults,response, err := client.Search.Commits(ctx, "user:"+*user.Login+" committer-date:>2020-05-01",opt)
+			commitResults, response, err := client.Search.Commits(ctx, "user:"+*user.Login+" committer-date:>2020-05-01", opt)
 			if err != nil {
 				fmt.Println("Error while reading commits", err)
 				break
 			}
 			if *commitResults.Total > 0 {
-				fmt.Printf("found %d commits \n",*commitResults.Total)
-				for commitResult := range commitResults.Commits {
-					fmt.Printf("CommitResult : %v \n",commitResult)
-					// fmt.Printf("CommitResult : %v %v %v \n",*commitResult.Author, *commitResult.Repository, *commitResult.Score)
-					// allCommits = append(allCommits, commitResult.Commit)
+				fmt.Printf("found %d commits \n", *commitResults.Total)
+				for _, commitResult := range commitResults.Commits {
+					//fmt.Printf("CommitResult : %v \n",commitResult)
+					fmt.Printf("CommitResult : %v %v %v\n", *commitResult.Author.Login, *commitResult.Repository.Name, *commitResult.Score)
+					allCommits = append(allCommits, commitResult.Commit)
 				}
 			}
 
@@ -122,5 +122,6 @@ func main() {
 			}
 			opt.Page = response.NextPage
 		}
+		fmt.Printf("final list of commit for %v is %v \n", *user.Name, len(allCommits))
 	}
 }
