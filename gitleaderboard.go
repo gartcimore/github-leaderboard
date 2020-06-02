@@ -73,7 +73,7 @@ func main() {
 	// list all repositories for each user
 
 	for i, participant := range participants {
-		fmt.Printf("Reading for participant %s (%v)\n", participant, i)
+		fmt.Printf("Reading for participant %s (%v)\n", participant, i+1)
 		// repositories, _, err := client.Repositories.List(ctx, participant, nil)
 		// if err != nil {
 		// 	fmt.Println("Error while reading repositories")
@@ -103,9 +103,9 @@ func main() {
 			ListOptions: github.ListOptions{PerPage: 10},
 		}
 		for {
-			commitResults,response, err := client.Search.Commits(ctx, "#{"+*user.Login+"}",opt)
+			commitResults,response, err := client.Search.Commits(ctx, "user:"+*user.Login+" committer-date:>2020-05-01",opt)
 			if err != nil {
-				fmt.Println("Error while reading issues")
+				fmt.Println("Error while reading commits", err)
 				break
 			}
 			if *commitResults.Total > 0 {
