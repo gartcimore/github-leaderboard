@@ -24,7 +24,7 @@ RUN apk --no-cache add ca-certificates
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/gitleaderboard .
-COPY --from=builder /app/members .
+COPY --from=builder /app/participants .
 
 
 # Expose port 8080 to the outside world
