@@ -109,7 +109,7 @@ func main() {
 				break
 			}
 			if *commitResults.Total > 0 {
-				fmt.Printf("found %d commits \n",commitResults.Total)
+				fmt.Printf("found %d commits \n",*commitResults.Total)
 				for commitResult := range commitResults.Commits {
 					fmt.Printf("CommitResult : %v \n",commitResult)
 					// fmt.Printf("CommitResult : %v %v %v \n",*commitResult.Author, *commitResult.Repository, *commitResult.Score)
