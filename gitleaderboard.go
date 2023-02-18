@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
 	"log"
 	"os"
